@@ -39,31 +39,27 @@ namespace EmergencyNow.UI.AccesoADatos.Respuesta
                 var filtro = Builders<Respuestas>.Filter.Eq(r => r.IdUsuario, usuarioId) &
                              Builders<Respuestas>.Filter.Eq(r => r.Estado, "En proceso");
 
-                // Obtiene solo la primera respuesta que coincida con el filtro
                 var respuestaEnProceso = await _respuestas.Find(filtro).FirstOrDefaultAsync();
 
                 return respuestaEnProceso;
             }
             catch
             {
-                return null; // Devuelve null si hay algún error
+                return null; 
             }
         }
 
         public async Task<Respuestas> ObtenerRespuestaActivaPorUsuario(Guid idUsuario)
         {
-            // Buscar una respuesta que esté vinculada al usuario y cuyo estado sea "Activo"
             var respuesta = await _respuestas
                 .Find(r => r.IdUsuario == idUsuario && r.Estado == "Activo")
                 .FirstOrDefaultAsync();
 
-            // Si no se encuentra ninguna respuesta activa, retornar null
             if (respuesta == null)
             {
                 return null;
             }
 
-            // Mapear la respuesta al DTO para devolverla al controlador
             var respuestaDto = new Respuestas
             {
                 Id = respuesta.Id,
@@ -72,7 +68,6 @@ namespace EmergencyNow.UI.AccesoADatos.Respuesta
                 IdTipoRespuesta = respuesta.IdTipoRespuesta,
                 Estado = respuesta.Estado,
                 HoraDeRespuesta = respuesta.HoraDeRespuesta
-                // Puedes añadir más propiedades aquí según el modelo de RespuestaDto
             };
 
             return respuestaDto;
@@ -117,7 +112,6 @@ namespace EmergencyNow.UI.AccesoADatos.Respuesta
             }
             catch
             {
-                // Si ocurre un error, devuelve false
                 return false;
             }
         }
@@ -126,30 +120,26 @@ namespace EmergencyNow.UI.AccesoADatos.Respuesta
         {
             try
             {
-                // Paso 1: Obtener el TipoDeRespuesta asociado al usuario
                 var tipoDeRespuesta = await _TipoDeRespuesta
                     .Find(t => t.IdUsuario == idUsuarioTipoRespuesta)
                     .FirstOrDefaultAsync();
 
                 if (tipoDeRespuesta == null)
                 {
-                    return new List<ReporteDto>(); // Si no existe, devolver lista vacía
+                    return new List<ReporteDto>(); 
                 }
 
-                // Paso 2: Obtener las respuestas asociadas al TipoDeRespuesta
                 var respuestas = await _respuestas
                     .Find(r => r.IdTipoRespuesta == tipoDeRespuesta.Id)
                     .ToListAsync();
 
                 if (respuestas.Count == 0)
                 {
-                    return new List<ReporteDto>(); // Si no hay respuestas, devolver lista vacía
+                    return new List<ReporteDto>(); 
                 }
 
-                // Paso 3: Obtener los IDs de los reportes asociados a las respuestas
                 var reporteIds = respuestas.Select(r => r.IdIncidente).Distinct().ToList();
 
-                // Paso 4: Obtener los reportes utilizando los IDs recopilados
                 var reportes = await _reportes
                     .Find(r => reporteIds.Contains(r.Id))
                     .ToListAsync();
@@ -158,7 +148,6 @@ namespace EmergencyNow.UI.AccesoADatos.Respuesta
             }
             catch
             {
-                // Si ocurre algún error, devolver lista vacía
                 return new List<ReporteDto>();
             }
         }

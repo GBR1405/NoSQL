@@ -5,57 +5,109 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Editar</h1>
+<div class="container mt-5 text-center">
+    <h1 class="text-primary">Editar Tipo de Respuesta</h1>
+    <h4 class="text-secondary">Actualiza los detalles de tu equipo</h4>
+    <hr class="mb-4" />
 
-<h4>TipoDeRespuesta</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Editar">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group" style="display: none;">
-                <label asp-for="Id" class="control-label"></label>
-                <input asp-for="Id" class="form-control" />
-                <span asp-validation-for="Id" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Placa" class="control-label"></label>
-                <input asp-for="Placa" class="form-control" />
-                <span asp-validation-for="Placa" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="TipoDeRespuestaGeneral" class="control-label"></label>
-                <input asp-for="TipoDeRespuestaGeneral" class="form-control" />
-                <span asp-validation-for="TipoDeRespuestaGeneral" class="text-danger"></span>
-            </div>
-            <div class="form-group" style="display: none;">
-                <label asp-for="IdUsuario" class="control-label"></label>
-                <input asp-for="IdUsuario" class="form-control" />
-                <span asp-validation-for="IdUsuario" class="text-danger"></span>
-            </div>
-            <div class="form-group" style="display: none;">
-                <label asp-for="IdOrganizacion" class="control-label"></label>
-                <input asp-for="IdOrganizacion" class="form-control" />
-                <span asp-validation-for="IdOrganizacion" class="text-danger"></span>
-            </div>
-            <div class="form-group" style="display: none;">
-                <label asp-for="Estado" class="control-label"></label>
-                <input asp-for="Estado" class="form-control" />
-                <span asp-validation-for="Estado" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CantidadMaxDePersonas" class="control-label"></label>
-                <input asp-for="CantidadMaxDePersonas" class="form-control" />
-                <span asp-validation-for="CantidadMaxDePersonas" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form asp-action="Editar">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <!-- ID (oculto) -->
+                <div class="form-group" style="display: none;">
+                    <label asp-for="Id" class="control-label"></label>
+                    <input asp-for="Id" class="form-control" />
+                    <span asp-validation-for="Id" class="text-danger"></span>
+                </div>
+
+                <!-- Placa -->
+                <div class="form-group mb-3">
+                    <label asp-for="Placa" class="form-label text-start"></label>
+                    <input asp-for="Placa" class="form-control" />
+                    <span asp-validation-for="Placa" class="text-danger"></span>
+                </div>
+
+                <!-- Tipo de Respuesta -->
+                <div class="form-group mb-3">
+                    <label asp-for="TipoDeRespuestaGeneral" class="form-label"></label>
+                    <select asp-for="TipoDeRespuestaGeneral" class="form-control" id="tipoRespuesta" onchange="updateImage()">
+                        <option value="policial">Policial</option>
+                        <option value="medica">Médica</option>
+                        <option value="bomberos">Bomberos</option>
+                    </select>
+                    <span asp-validation-for="TipoDeRespuestaGeneral" class="text-danger"></span>
+                </div>
+
+                <!-- Imagen dinámica -->
+                <div class="mb-4">
+                    <img id="responseImage" src="https://via.placeholder.com/150" class="img-fluid rounded shadow" alt="Equipo" style="max-width: 100%; height: auto;">
+                </div>
+
+                <!-- Cantidad máxima de personas -->
+                <div class="form-group mb-3">
+                    <label asp-for="CantidadMaxDePersonas" class="form-label"></label>
+                    <input asp-for="CantidadMaxDePersonas" class="form-control" />
+                    <span asp-validation-for="CantidadMaxDePersonas" class="text-danger"></span>
+                </div>
+
+                <!-- ID Usuario (oculto) -->
+                <div class="form-group" style="display: none;">
+                    <label asp-for="IdUsuario" class="control-label"></label>
+                    <input asp-for="IdUsuario" class="form-control" />
+                    <span asp-validation-for="IdUsuario" class="text-danger"></span>
+                </div>
+
+                <!-- ID Organización (oculto) -->
+                <div class="form-group" style="display: none;">
+                    <label asp-for="IdOrganizacion" class="control-label"></label>
+                    <input asp-for="IdOrganizacion" class="form-control" />
+                    <span asp-validation-for="IdOrganizacion" class="text-danger"></span>
+                </div>
+
+                <!-- Estado (oculto) -->
+                <div class="form-group" style="display: none;">
+                    <label asp-for="Estado" class="control-label"></label>
+                    <input asp-for="Estado" class="form-control" />
+                    <span asp-validation-for="Estado" class="text-danger"></span>
+                </div>
+
+                <!-- Botón guardar -->
+                <div class="form-group">
+                    <input type="submit" value="Guardar" class="btn btn-primary w-100" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="MostrarEquipoDisponible" class="btn btn-secondary">Volver a la lista</a>
     </div>
 </div>
 
-<div>
-    <a asp-action="MostrarEquipoDisponible">Volver a la lista</a>
-</div>
+@section Scripts {
+    <script>
+        function updateImage() {
+            const tipo = document.getElementById("tipoRespuesta").value;
+            let imageUrl;
 
+            switch (tipo) {
+                case "policial":
+                    imageUrl = "https://static.vecteezy.com/system/resources/previews/013/271/121/non_2x/police-car-3d-rendering-png.png";
+                    break;
+                case "medica":
+                    imageUrl = "https://static.vecteezy.com/system/resources/previews/026/773/226/non_2x/ambulance-with-ai-generated-free-png.png";
+                    break;
+                case "bomberos":
+                    imageUrl = "https://static.vecteezy.com/system/resources/previews/026/772/547/non_2x/firetruck-with-ai-generated-free-png.png";
+                    break;
+                default:
+                    imageUrl = "https://via.placeholder.com/150";
+                    break;
+            }
+
+            document.getElementById("responseImage").src = imageUrl;
+        }
+    </script>
+}

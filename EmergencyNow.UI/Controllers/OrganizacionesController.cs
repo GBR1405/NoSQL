@@ -33,14 +33,12 @@ namespace EmergencyNow.UI.Controllers
 
         public IActionResult ReportesEntrantes()
         {
-            // Obtener los reportes activos desde la capa de acceso a datos
             var reportesActivos = _crearReporte.ObtenerReportesActivos();
             return View(reportesActivos);
         }
 
         public async Task<IActionResult> MostrarEquipoDisponible()
         {
-            // Obtener el usuario logueado
             var usuario = await _userManager.GetUserAsync(User);
             if (usuario == null)
             {
@@ -54,7 +52,7 @@ namespace EmergencyNow.UI.Controllers
                 ViewBag.Mensaje = "No tienes equipos de respuesta en este momento.";
             }
 
-            return View(tiposRespuesta); // Aquí pasamos directamente los resultados a la vista
+            return View(tiposRespuesta); 
         }
 
         public async Task<IActionResult> MostrarEquipoDisponiblePorId(string id)
@@ -70,13 +68,11 @@ namespace EmergencyNow.UI.Controllers
                 return RedirectToAction("MostrarEquipoDisponible", "Organizaciones", new { tiposRespuesta = tiposRespuesta });
         }
 
-        // Método para formatear el string como GUID
         private string FormatGuid(string id)
         {
-            // Aseguramos que el string tenga el formato adecuado con guiones
             return id.Length == 32 ?
                 $"{id.Substring(0, 8)}-{id.Substring(8, 4)}-{id.Substring(12, 4)}-{id.Substring(16, 4)}-{id.Substring(20)}"
-                : id; // Si ya tiene el formato, se devuelve tal cual
+                : id; 
         }
 
 
@@ -86,7 +82,6 @@ namespace EmergencyNow.UI.Controllers
         // GET: OrganizacionesController/Create
         public ActionResult Create()
         {
-            // Aquí puedes inicializar el modelo vacío para que no sea null
             var usuarioOrganizacion = new UsuarioOrganizacion
             {
                 Usuario = new User(),
@@ -101,7 +96,6 @@ namespace EmergencyNow.UI.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Crear el usuario
                 User user = usuarioOrganizacion.Usuario;
 
                 ApplicationUser appUser = new ApplicationUser
@@ -115,22 +109,17 @@ namespace EmergencyNow.UI.Controllers
 
                 };
 
-                // Crear el usuario en la base de datos
                 IdentityResult result = await _userManager.CreateAsync(appUser, usuarioOrganizacion.Usuario.Password);
 
                 if (result.Succeeded)
                 {
-                    // Asignar un rol al usuario (opcional)
                     await _userManager.AddToRoleAsync(appUser, "Organizador");
 
-                    // Obtener el ID del usuario creado
                     string userId = appUser.Id.ToString();
 
-                    // Ahora agregamos el ID del usuario a la organización
                     Organizaciones organizacion = usuarioOrganizacion.Organizacion;
                     organizacion.UsuarioId = appUser.Id;  // Convertir userId a ObjectId
 
-                    // Guardamos la organización en la base de datos
                     bool isOrganizacionSaved = await _organizacionAD.AgregarOrganizacionAsync(organizacion);
 
                     if (isOrganizacionSaved)
@@ -165,7 +154,6 @@ namespace EmergencyNow.UI.Controllers
         {
             //if (ModelState.IsValid)
             //{
-                // Crear el usuario
                 User user = usuarioTipoRespuesta.Usuario;
                 usuarioTipoRespuesta.Respuestas.Estado = "Activo";
 
@@ -179,21 +167,17 @@ namespace EmergencyNow.UI.Controllers
                     Ubicacion = user.Ubicacion,
                 };
 
-                // Crear el usuario en la base de datos
                 IdentityResult result = await _userManager.CreateAsync(appUser, usuarioTipoRespuesta.Usuario.Password);
 
                 if (result.Succeeded)
                 {
-                    // Asignar un rol al usuario (opcional)
                     await _userManager.AddToRoleAsync(appUser, "EquipoRescate");
                 var usuario = await _userManager.GetUserAsync(User);
 
-                // Ahora agregamos el ID del usuario a TipoDeRespuesta
                 TipoDeRespuesta tipoRespuesta = usuarioTipoRespuesta.Respuestas;
                     tipoRespuesta.IdUsuario = appUser.Id;  // Asegúrate de convertir el userId a Guid si es necesario
                     tipoRespuesta.IdOrganizacion = usuario.Id;
 
-                    // Guardar el tipo de respuesta en la base de datos usando el método AD
                     bool isTipoRespuestaSaved = await _tipoRespuestaAD.GuardarTipoDeRespuestaAsync(tipoRespuesta);
 
                     if (isTipoRespuestaSaved)
@@ -234,7 +218,7 @@ namespace EmergencyNow.UI.Controllers
                 return NotFound("No se encontró el tipo de respuesta.");
             }
 
-            return View(tipoDeRespuesta); // Pasamos el objeto deserializado a la vista.
+            return View(tipoDeRespuesta); 
         }
         
 
@@ -246,7 +230,6 @@ namespace EmergencyNow.UI.Controllers
                 return BadRequest("El ID no puede estar vacío.");
             }
 
-            // Obtener el TipoDeRespuesta por ID
             var tipoDeRespuesta = await _tipoRespuestaAD.ObtenerTipoRespuestaPorIdAsync(id);
 
             if (tipoDeRespuesta == null)
@@ -254,7 +237,6 @@ namespace EmergencyNow.UI.Controllers
                 return NotFound("El tipo de respuesta no fue encontrado.");
             }
 
-            // Invertir el estado actual
             if (tipoDeRespuesta.Estado == "Activo")
             {
                 tipoDeRespuesta.Estado = "Inactivo";
@@ -268,18 +250,17 @@ namespace EmergencyNow.UI.Controllers
                 return BadRequest("El estado actual no es válido.");
             }
 
-            // Guardar los cambios en la base de datos (MongoDB)
             var resultado = await _tipoRespuestaAD.ActualizarTipoRespuestaAsync(tipoDeRespuesta);
 
             if (resultado)
             {
                 TempData["Message"] = $"El estado se cambió a '{tipoDeRespuesta.Estado}' con éxito.";
-                return RedirectToAction(nameof(MostrarEquipoDisponible)); // Redirige a la vista que prefieras
+                return RedirectToAction(nameof(MostrarEquipoDisponible)); 
             }
             else
             {
                 ModelState.AddModelError("", "Hubo un error al cambiar el estado.");
-                return View(tipoDeRespuesta); // Devuelve la vista con el modelo actual
+                return View(tipoDeRespuesta); 
             }
         }
 
@@ -287,7 +268,6 @@ namespace EmergencyNow.UI.Controllers
 
         public async Task<IActionResult> Editar(string id)
         {
-            // Obtener el TipoDeRespuesta por ID
             var tipoRespuesta = await _tipoRespuestaAD.ObtenerTipoRespuestaPorIdAsync(id);
 
             if (tipoRespuesta == null)
@@ -295,7 +275,7 @@ namespace EmergencyNow.UI.Controllers
                 return NotFound("El tipo de respuesta no fue encontrado.");
             }
 
-            return View(tipoRespuesta); // Pasamos el objeto a la vista
+            return View(tipoRespuesta); 
         }
 
         [HttpPost]
@@ -304,7 +284,6 @@ namespace EmergencyNow.UI.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Actualizar el objeto en la base de datos
                 var resultado = await _tipoRespuestaAD.EditarTipoDeRespuestaAsync(tipoRespuesta);
 
                 if (resultado)
@@ -318,7 +297,7 @@ namespace EmergencyNow.UI.Controllers
                 }
             }
 
-            return View(tipoRespuesta); // Si hay errores, volvemos a mostrar la vista con el modelo actual
+            return View(tipoRespuesta); 
         }
 
         public async Task<IActionResult> Historial()

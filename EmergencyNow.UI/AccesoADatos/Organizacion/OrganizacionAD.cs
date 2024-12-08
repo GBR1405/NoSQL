@@ -20,13 +20,11 @@ namespace EmergencyNow.UI.AccesoADatos.Organizacion
         {
             try
             {
-                // Insertamos la nueva organización en la colección
                 await _Organizaciones.InsertOneAsync(organizacion);
                 return true;
             }
             catch
             {
-                // En caso de error, retornamos false
                 return false;
             }
         }
@@ -35,13 +33,11 @@ namespace EmergencyNow.UI.AccesoADatos.Organizacion
         {
             try
             {
-                // Obtenemos todas las organizaciones (o sucursales) desde la colección
                 var sucursales = await _Organizaciones.Find(_ => true).ToListAsync();
                 return sucursales;
             }
             catch
             {
-                // En caso de error, retornamos una lista vacía
                 return new List<Organizaciones>();
             }
         }

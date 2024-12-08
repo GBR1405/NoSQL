@@ -18,7 +18,6 @@ namespace EmergencyNow.UI.Controllers
         private readonly ICrearReporte _crearReporteAD;
         private readonly IRespuestasAD _Respuesta;
 
-        // Aquí se debe recibir la interfaz (ICrearReporte) en lugar de la clase directamente
         public ReportesController(ICrearReporte crearReporteAD, UserManager<ApplicationUser> userManager, IRespuestasAD repuesta)
         {
             _crearReporteAD = crearReporteAD;
@@ -51,52 +50,47 @@ namespace EmergencyNow.UI.Controllers
             return View(reporte);
         }
 
-
-        // Mostrar vista para crear reporte
         public IActionResult Crear()
         {
             return View();
         }
 
-        // Acción para enviar el reporte
         [HttpPost]
         public async Task<IActionResult> Crear(ReporteDto reporte)
         {
-            // Verificar si la ubicación fue enviada
+            
             if (!string.IsNullOrEmpty(reporte.UbicacionString))
             {
-                // Dividir las coordenadas recibidas por la coma
+                
                 var coords = reporte.UbicacionString.Split(',');
 
-                // Depuración: Mostrar las coordenadas recibidas
+                
                 Console.WriteLine($"Coordenadas recibidas: Lat = {coords[0]}, Lng = {coords[1]}");
 
-                // Verificar que tenemos exactamente 2 coordenadas
+                
                 if (coords.Length == 2 &&
                     double.TryParse(coords[0], NumberStyles.Any, CultureInfo.InvariantCulture, out double lat) &&
                     double.TryParse(coords[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double lng))
                 {
-                    // Asignar las coordenadas al objeto reporte
+                    
                     reporte.Ubicacion = new double[] { lat, lng };
                 }
                 else
                 {
-                    // Si no se pudieron analizar las coordenadas, agregar error al estado del modelo
+                    
                     ModelState.AddModelError("UbicacionString", "Coordenadas inválidas.");
                     return View(reporte);
                 }
             }
             else
             {
-                // Si no se envió ninguna ubicación, agregar error al estado del modelo
+                
                 ModelState.AddModelError("UbicacionString", "Por favor selecciona una ubicación en el mapa.");
                 return View(reporte);
             }
 
-            // Asignar el ID del usuario autenticado
             reporte.IdUsuario = _userManager.GetUserId(User);
 
-            // Guardar el reporte (simulación)
             var resultado = await _crearReporteAD.AgregarReporteAsync(reporte);
             if (resultado)
             {
@@ -104,8 +98,6 @@ namespace EmergencyNow.UI.Controllers
                 return RedirectToAction("Index", "Home");
 
             }
-
-            // Si hubo un error, agregarlo al estado del modelo
             ModelState.AddModelError("", "Hubo un error al guardar el reporte.");
             return View(reporte);
         }
