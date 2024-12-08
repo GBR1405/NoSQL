@@ -1,0 +1,21 @@
+﻿@model EmergencyNow.UI.Models.Interfaces.Modelos.TipoDeRespuesta
+
+<h1>Cambiar Estado</h1>
+
+<p>¿Estás seguro de que deseas desactivar este tipo de respuesta?</p>
+
+<div>
+    <h3>Detalles:</h3>
+    <ul>
+        <li><strong>ID:</strong> @Model.Id</li>
+        <li><strong>Nombre:</strong> @Model.Placa</li>
+        <li><strong>Descripción:</strong> @Model.CantidadMaxDePersonas</li>
+        <li><strong>Estado Actual:</strong> @Model.Estado</li>
+    </ul>
+</div>
+
+<form asp-action="CambiarEstadoConfirmado" method="post">
+    <input type="hidden" name="id" value="@Model.Id" />
+    <button type="submit" class="btn btn-danger">Cambiar Estado</button>
+    <a asp-action="MostrarEquipoDisponible" class="btn btn-secondary">Cancelar</a>
+</form>

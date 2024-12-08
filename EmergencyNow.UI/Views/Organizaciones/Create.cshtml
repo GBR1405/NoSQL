@@ -1,0 +1,153 @@
+﻿@model EmergencyNow.UI.Models.Interfaces.ObjetoCompuesto.UsuarioOrganizacion
+
+@{
+    ViewData["Title"] = "Crea una nueva Organizacion";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1 class="text-center">@ViewData["Title"]</h1>
+
+<h4 class="text-center">Formulario de Creación de Usuario y Organización</h4>
+<hr />
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <!-- Campos del Modelo Usuario -->
+            <h5 class="text-center">Información del Usuario</h5>
+
+            <div class="form-row custom-form-row">
+                <div class="form-group col-md-4">
+                    <label for="Usuario.Name">Nombre de Usuario</label>
+                    <input asp-for="Usuario.Name" class="form-control" />
+                    <span asp-validation-for="Usuario.Name" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="Usuario.NombreUsuario">Nombre</label>
+                    <input asp-for="Usuario.NombreUsuario" class="form-control" />
+                    <span asp-validation-for="Usuario.NombreUsuario" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-2">
+                    <label for="Usuario.Apellido1">Primer Apellido</label>
+                    <input asp-for="Usuario.Apellido1" class="form-control" />
+                    <span asp-validation-for="Usuario.Apellido1" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-2">
+                    <label for="Usuario.Apellido2">Segundo Apellido</label>
+                    <input asp-for="Usuario.Apellido2" class="form-control" />
+                    <span asp-validation-for="Usuario.Apellido2" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-row custom-form-row">
+                <div class="form-group col-md-6">
+                    <label for="Usuario.Ubicacion">Ubicación</label>
+                    <input asp-for="Usuario.Ubicacion" class="form-control" />
+                    <span asp-validation-for="Usuario.Ubicacion" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label for="Usuario.Telefono">Teléfono</label>
+                    <input asp-for="Usuario.Telefono" class="form-control" />
+                    <span asp-validation-for="Usuario.Telefono" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-row custom-form-row">
+                <div class="form-group col-md-6">
+                    <label for="Usuario.Email">Correo Electrónico</label>
+                    <input asp-for="Usuario.Email" class="form-control" />
+                    <span asp-validation-for="Usuario.Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label for="Usuario.Password">Contraseña</label>
+                    <input asp-for="Usuario.Password" type="password" class="form-control" />
+                    <span asp-validation-for="Usuario.Password" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- Rol - oculto y con valor predeterminado -->
+            <input asp-for="Usuario.AgregarRol" type="hidden" value="Organización" />
+
+            <!-- Campos del Modelo Organización -->
+            <h5 class="text-center">Información de la Organización</h5>
+
+            <div class="form-row custom-form-row">
+                <div class="form-group col-md-6">
+                    <label for="Organizacion.Nombre">Nombre de la Organización</label>
+                    <input asp-for="Organizacion.Nombre" class="form-control" />
+                    <span asp-validation-for="Organizacion.Nombre" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label for="Organizacion.Tipo">Tipo de Organización</label>
+                    <select asp-for="Organizacion.Tipo" class="form-control">
+                        <option value="">Seleccione un tipo...</option>
+                        <option value="Policial">Policial</option>
+                        <option value="Medico">Médico</option>
+                        <option value="Bomberos">Bomberos</option>
+                        <option value="General">General</option>
+                        <option value="Equipo Independiente">Equipo Independiente</option>
+                    </select>
+                    <span asp-validation-for="Organizacion.Tipo" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-row custom-form-row">
+                <div class="form-group col-md-4">
+                    <label for="Organizacion.Contacto.Telefono">Teléfono de Contacto</label>
+                    <input asp-for="Organizacion.Contacto.Telefono" class="form-control" />
+                    <span asp-validation-for="Organizacion.Contacto.Telefono" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="Organizacion.Contacto.Email">Email de Contacto</label>
+                    <input asp-for="Organizacion.Contacto.Email" class="form-control" />
+                    <span asp-validation-for="Organizacion.Contacto.Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="Organizacion.Ubicacion">Ubicación de la Organización</label>
+                    <input asp-for="Organizacion.Ubicacion" class="form-control" />
+                    <span asp-validation-for="Organizacion.Ubicacion" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- Botón de Enviar -->
+            <div class="form-group text-center">
+                <input type="submit" value="Crear" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="text-center">
+    <a asp-action="Index" class="btn btn-secondary">Volver a la lista</a>
+</div>
+
+<!-- Estilos personalizados -->
+<style>
+    .custom-form-row {
+        margin-bottom: 15px; /* Separación entre las filas */
+    }
+
+    .form-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px; /* Control de espacio entre los inputs */
+    }
+
+    .form-group {
+        margin-bottom: 0; /* No margen adicional */
+    }
+
+    .form-control {
+        margin-bottom: 10px; /* Separación mínima entre los inputs */
+    }
+</style>

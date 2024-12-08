@@ -1,0 +1,18 @@
+﻿@model IEnumerable<EmergencyNow.UI.Models.Interfaces.Reportes.Organizaciones>
+
+@foreach (var organizacion in Model)
+{
+    <div class="col-md-4 mb-4 organizacion-card">
+        <div class="card" style="width: 18rem;">
+            <div class="card-body">
+                <h5 class="card-title">@organizacion.Nombre</h5>
+                <h6 class="card-subtitle mb-2 text-muted">@organizacion.Tipo</h6>
+                <p class="card-text">
+                    <strong>Ubicación:</strong> @organizacion.Ubicacion <br>
+                    <strong>Teléfono:</strong> @organizacion.Contacto.Telefono <br>
+                    <strong>Email:</strong> @organizacion.Contacto.Email
+                </p>
+            </div>
+        </div>
+    </div>
+}

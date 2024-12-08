@@ -1,0 +1,43 @@
+﻿@model EmergencyNow.UI.Models.Interfaces.Reportes.ReporteDto
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Detalle del Reporte</h2>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Tipo de Incidente: @Model.TipoIncidente</h5>
+            <p><strong>Descripción:</strong> @Model.Descripcion</p>
+            <p><strong>Gravedad:</strong> @Model.Gravedad</p>
+            <p><strong>Estado:</strong> @Model.Estado</p>
+            <p><strong>Fecha del Reporte:</strong> @Model.FechaReporte.ToString("dd/MM/yyyy HH:mm")</p>
+        </div>
+    </div>
+
+    <div id="map" style="height: 400px; border: 1px solid #ced4da;"></div>
+
+    <div class="mt-4 text-center">
+        <a asp-controller="Reportes" asp-action="Historial" class="btn btn-primary">Volver al Historial</a>
+    </div>
+
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+    <script>
+        // Coordenadas del incidente desde el modelo
+        const coords = @Html.Raw(Json.Serialize(Model.Ubicacion));
+
+        // Inicialización del mapa
+        var map = L.map('map').setView([coords[0], coords[1]], 15);
+
+        // Añadir capa de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
+
+        // Añadir marcador en la ubicación del incidente
+        L.marker([coords[0], coords[1]]).addTo(map)
+            .bindPopup('Ubicación del incidente')
+            .openPopup();
+    </script>
+}

@@ -1,0 +1,127 @@
+﻿@model IEnumerable<EmergencyNow.UI.Models.Interfaces.Modelos.TipoDeRespuesta>
+
+@{
+    ViewData["Title"] = "Mostrar Equipo Disponible";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var mensaje = ViewBag.Mensaje as string;
+}
+
+<div class="text-center mb-4">
+    <h1 class="display-4">Mostrar Equipo Disponible</h1>
+    <p class="lead">Acá están todos los equipos disponibles de tu organización</p>
+</div>
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-success">
+        @ViewBag.Message
+    </div>
+}
+
+<div class="text-center mb-4">
+    <a asp-action="CrearRespuesta" asp-controller="Organizaciones" class="btn btn-primary btn-lg">Crear Nuevo</a>
+</div>
+
+@if (!string.IsNullOrEmpty(mensaje))
+{
+    <div class="alert alert-danger">
+        <strong>Error!</strong> @mensaje
+    </div>
+}
+
+<!-- Filtro por tipo de equipo -->
+<div class="mb-4">
+    <label for="filtroTipo" class="form-label">Filtrar por tipo de equipo:</label>
+    <select id="filtroTipo" class="form-select" onchange="filtrarEquipos()">
+        <option value="">Todos</option>
+        <option value="Policial">Policial</option>
+        <option value="Medica">Médica</option>
+        <option value="Bomberos">Bomberos</option>
+    </select>
+</div>
+
+<div class="row" id="equipoContainer">
+    @foreach (var item in Model)
+    {
+        string imageUrl = string.Empty;
+        string buttonText = "Cambiar Estado";
+        string reportButton = "";
+
+        // Determinar la imagen del equipo y el texto del botón
+        switch (item.TipoDeRespuestaGeneral.ToLower())
+        {
+            case "policial":
+                imageUrl = "https://static.vecteezy.com/system/resources/previews/013/271/121/non_2x/police-car-3d-rendering-png.png";
+                break;
+            case "medica":
+                imageUrl = "https://static.vecteezy.com/system/resources/previews/026/773/226/non_2x/ambulance-with-ai-generated-free-png.png";
+                break;
+            case "bomberos":
+                imageUrl = "https://static.vecteezy.com/system/resources/previews/026/772/547/non_2x/firetruck-with-ai-generated-free-png.png";
+                break;
+            default:
+                imageUrl = "https://via.placeholder.com/150"; // Imagen predeterminada
+                break;
+        }
+
+        // Si el estado es "Ocupado", añadir el botón de Ver Reporte
+        @if (item.Estado == "Ocupado")
+        {
+            reportButton = "<a href='" + Url.Action("DetalleCompletoTipoDeRespuesta", "Reportes", new { id = item.Id }) + "' class='btn btn-info btn-sm'>Ver Reporte</a>";
+            buttonText = "Deshabilitar"; 
+        }
+
+
+        // Establecer clase para equipo inactivo
+        string cardClass = item.Estado == "Inactivo" ? "card-inactivo" : "";
+
+        <div class="col-md-3 mb-4 card-container" data-tipo="@item.TipoDeRespuestaGeneral">
+            <div class="card rounded-3 shadow p-3 h-100 @cardClass">
+                <!-- Imagen centrada -->
+                <img src="@imageUrl" class="card-img-top mx-auto" alt="Equipo" style="height: 150px; object-fit: contain;">
+
+                <!-- Información de la card -->
+                <div class="card-body text-center">
+                    <p class="text-muted mb-1">
+                        <strong>Placa:</strong> @item.Placa <br>
+                        <strong>Capacidad:</strong> @item.CantidadMaxDePersonas <br>
+                        <strong>Tipo:</strong> @item.TipoDeRespuestaGeneral
+                    </p>
+                    <h5 class="text-uppercase fw-bold mt-2">@item.Estado</h5>
+                </div>
+
+                <!-- Botones -->
+                <div class="card-footer bg-white border-0">
+                    <div class="d-flex justify-content-between">
+                        <a class="btn btn-warning btn-sm" asp-action="Editar" asp-route-id="@item.Id">Editar</a>
+                        @if (item.Estado != "Ocupado")
+                        {
+                            <a class="btn btn-danger btn-sm" asp-action="CambiarEstado" asp-route-id="@item.Id">@buttonText</a>
+                        }
+                        @Html.Raw(reportButton)
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Filtro por tipo de equipo
+        function filtrarEquipos() {
+            var filtroTipo = document.getElementById("filtroTipo").value.toLowerCase();
+            var equipos = document.querySelectorAll(".card-container");
+
+            equipos.forEach(function (equipo) {
+                var tipo = equipo.getAttribute("data-tipo").toLowerCase();
+                if (filtroTipo === "" || tipo.includes(filtroTipo)) {
+                    equipo.style.display = "block";
+                } else {
+                    equipo.style.display = "none";
+                }
+            });
+        }
+    </script>
+}
+

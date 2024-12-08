@@ -1,0 +1,65 @@
+﻿@model IEnumerable<EmergencyNow.UI.Models.Interfaces.Reportes.ReporteDto>
+
+@{
+    ViewData["Title"] = "HistorialOrganizacion";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1 class="text-center mb-4">Historial de Reportes</h1>
+
+<!-- Barra de búsqueda -->
+<div class="row mb-3">
+    <div class="col-md-6 offset-md-3">
+        <input type="text"
+               id="searchBar"
+               class="form-control"
+               placeholder="Buscar por placa..."
+               onkeyup="filtrarReportes()">
+    </div>
+</div>
+
+<!-- Tabla de reportes -->
+<table class="table table-bordered table-striped" id="reportesTable">
+    <thead class="table-dark">
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.TipoIncidente)</th>
+            <th>@Html.DisplayNameFor(model => model.Descripcion)</th>
+            <th>@Html.DisplayNameFor(model => model.Gravedad)</th>
+            <th>Placa</th>
+            <th>@Html.DisplayNameFor(model => model.Estado)</th>
+            <th>@Html.DisplayNameFor(model => model.FechaReporte)</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.TipoIncidente)</td>
+                <td>@Html.DisplayFor(modelItem => item.Descripcion)</td>
+                <td>@Html.DisplayFor(modelItem => item.Gravedad)</td>
+                <td class="placa">@Html.DisplayFor(modelItem => item.UbicacionString)</td>
+                <td>@Html.DisplayFor(modelItem => item.Estado)</td>
+                <td>@Html.DisplayFor(modelItem => item.FechaReporte)</td>
+                <td>
+                    <a asp-action="DetalleCompletoOrganizacion" asp-route-id="@item.Id" class="btn btn-info btn-sm">Ver Detalle</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        // Función para filtrar reportes por placa
+        function filtrarReportes() {
+            const searchValue = document.getElementById("searchBar").value.toLowerCase();
+            const rows = document.querySelectorAll("#reportesTable tbody tr");
+
+            rows.forEach(row => {
+                const placa = row.querySelector(".placa").textContent.toLowerCase();
+                row.style.display = placa.includes(searchValue) ? "" : "none";
+            });
+        }
+    </script>
+}

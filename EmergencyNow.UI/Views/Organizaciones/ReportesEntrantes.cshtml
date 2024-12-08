@@ -1,0 +1,140 @@
+﻿@model List<EmergencyNow.UI.Models.Interfaces.Reportes.ReporteDto>
+
+@{
+    ViewData["Title"] = "Reportes Entrantes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1 class="text-center mb-4">Reportes Entrantes</h1>
+
+<div class="row">
+    <!-- Filtros -->
+    <div class="col-md-12 mb-3">
+        <label for="filtroTipoIncidente" class="form-label">Filtrar por Tipo de Incidente:</label>
+        <select class="form-select" id="filtroTipoIncidente">
+            <option value="Todos">Todos</option>
+            @foreach (var tipo in Model.Select(r => r.TipoIncidente).Distinct())
+            {
+                <option value="@tipo">@tipo</option>
+            }
+        </select>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-5">
+        <h3>Resumen de Reportes</h3>
+        @if (Model != null && Model.Any())
+        {
+            <ul class="list-group" id="listaReportes">
+                @foreach (var reporte in Model)
+                {
+                    <li class="list-group-item" data-id="@reporte.Id" onclick="mostrarDetalles('@reporte.Id')">
+                        <strong>@reporte.TipoIncidente</strong><br />
+                        <span>@(reporte.Descripcion.Length > 50 ? reporte.Descripcion.Substring(0, 50) + "..." : reporte.Descripcion)</span><br />
+                        <small>Gravedad: @reporte.Gravedad | Fecha: @reporte.FechaReporte.ToShortDateString()</small>
+                        <a class="btn btn-danger btn-sm mt-2"
+                           href="@Url.Action("Create", "Respuesta", new { id = reporte.Id })">
+                            Responder
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>No hay reportes activos disponibles.</p>
+        }
+    </div>
+
+    <div class="col-md-7">
+        <h3>Detalle del Reporte</h3>
+        <div id="detallesReporte">
+            <p>Seleccione un reporte de la lista para ver los detalles.</p>
+        </div>
+        <div id="map" style="height: 400px; border: 1px solid #ced4da; display:none;"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Leaflet Map CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+    <script>
+        // Obtenemos los reportes del modelo en formato JSON
+        const reportes = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+
+        // Inicializamos variables para el mapa y el marcador
+        let map, marker;
+
+        // Mostrar detalles del reporte seleccionado
+        function mostrarDetalles(reporteId) {
+            const reporte = reportes.find(r => r.Id === reporteId);
+
+            if (reporte) {
+                // Mostrar los detalles en el panel derecho
+                document.getElementById("detallesReporte").innerHTML = `
+                    <h4>Detalles</h4>
+                    <p><strong>Tipo de Incidente:</strong> ${reporte.TipoIncidente}</p>
+                    <p><strong>Descripción:</strong> ${reporte.Descripcion}</p>
+                    <p><strong>Gravedad:</strong> ${reporte.Gravedad}</p>
+                    <p><strong>Estado:</strong> ${reporte.Estado}</p>
+                    <p><strong>Fecha del Reporte:</strong> ${new Date(reporte.FechaReporte).toLocaleDateString()}</p>
+                    <p><strong>Ubicación:</strong> ${reporte.UbicacionString}</p>
+                `;
+
+                // Mostrar el mapa y centrar en la ubicación
+                const coords = reporte.Ubicacion;
+                if (!map) {
+                    map = L.map('map').setView([coords[0], coords[1]], 15);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
+                    marker = L.marker([coords[0], coords[1]]).addTo(map);
+                } else {
+                    map.setView([coords[0], coords[1]], 15);
+                    marker.setLatLng([coords[0], coords[1]]);
+                }
+
+                // Asegurarnos de que el mapa esté visible y centrado
+                document.getElementById("map").style.display = "block";
+                map.invalidateSize(); // Esto asegura que el mapa se ajuste al tamaño del contenedor
+            }
+        }
+
+        // Filtro por Tipo de Incidente
+        document.getElementById("filtroTipoIncidente").addEventListener("change", function () {
+            const filtro = this.value;
+
+            // Filtrar reportes según el tipo seleccionado
+            const reportesFiltrados = filtro === "Todos"
+                ? reportes
+                : reportes.filter(r => r.TipoIncidente === filtro);
+
+            // Actualizar la lista de reportes
+            const listaReportes = document.getElementById("listaReportes");
+            listaReportes.innerHTML = "";
+
+            reportesFiltrados.forEach(reporte => {
+                listaReportes.innerHTML += `
+                    <li class="list-group-item" data-id="${reporte.Id}" onclick="mostrarDetalles('${reporte.Id}')">
+                        <strong>${reporte.TipoIncidente}</strong><br>
+                        <span>${reporte.Descripcion.substring(0, 50)}...</span><br>
+                        <small>Gravedad: ${reporte.Gravedad} | Fecha: ${new Date(reporte.FechaReporte).toLocaleDateString()}</small>
+                        <a href="javascript:void(0)" class="btn btn-danger btn-sm mt-2" onclick="generarRespuesta('${reporte.Id}')">
+                            Responder
+                        </a>
+                    </li>
+                `;
+            });
+        });
+
+        // Función para redirigir al formulario de respuesta
+        function generarRespuesta(reporteId) {
+            const url = `/Respuesta/Create?id=${reporteId}`;
+            window.location.assign(url); // Usar .assign() en lugar de href para asegurar la correcta navegación
+        }
+
+    </script>
+}
+
+

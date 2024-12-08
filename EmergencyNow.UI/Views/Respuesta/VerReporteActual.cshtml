@@ -1,0 +1,208 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte Actual</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+</head>
+
+<style>
+    #map1, #map2 {
+        width: 100%;
+    }
+
+    .map1-container {
+        height: 400px;
+    }
+
+    .map2-container {
+        height: 600px;
+    }
+
+    .search-container {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .right-side-panel {
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-container, .notes-container {
+        margin-bottom: 20px;
+    }
+
+    .btn-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+        .btn-container button {
+            margin: 5px;
+        }
+
+    .location-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .report-info {
+        margin-bottom: 10px;
+    }
+
+    .center-title {
+        text-align: center;
+    }
+</style>
+
+<body>
+    <h1 class="mt-4 text-center">Reporte Actual Activo</h1>
+
+    @if (Model == null)
+    {
+        <p class="text-center"> No tienes reportes activos asignados por el momento.</p>
+        <p class="text-center"> Por favor, recarga la página si cree que tiene un reporte entrante</p>
+
+        <div style="display: flex; justify-content: center; align-items: center;">
+            <img class="text-center" src="https://cdn.shopify.com/s/files/1/1002/7190/files/couldthisbemoreawkward_large.gif?v=1488049833" alt="Furry white cat sitting on a wall">
+        </div>
+    }
+    else
+    {
+
+
+
+        <p class="text-center">Ve a la ubicación del reporte lo más rápido posible.</p>
+
+
+        @if (TempData["Mensaje"] != null)
+        {
+            <div class="alert alert-success text-center mt-4" role="alert">
+                <h4 class="alert-heading">Reporte enviado</h4>
+                <p>@TempData["Mensaje"]</p>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-md-9">
+                <div class="location-title">Ubicación del Reporte</div>
+
+                <!-- Nueva barra de búsqueda -->
+                <div class="search-container">
+                    <input type="text" id="destination" class="form-control" placeholder="Ingresa un destino (ej. Dirección, lugar)" />
+                    <button onclick="calculateRoute()" class="btn btn-primary">Buscar</button>
+                </div>
+
+                <div id="map2" class="map2-container"></div>
+            </div>
+
+            <!-- Columna de la derecha -->
+            <div class="col-md-3">
+                <div class="right-side-panel">
+                    <h3 class="center-title">Información del Reporte</h3>
+                    <div class="report-info">
+                        <p><strong>Tipo de incidente:</strong> @Model.TipoIncidente</p>
+                        <p><strong>Descripción:</strong> @Model.Descripcion</p>
+                        <p><strong>Gravedad:</strong> @Model.Gravedad</p>
+                        <p><strong>Estado:</strong> @Model.EstadoR</p>
+                    </div>
+
+                    <div class="notes-container">
+                        <h4>Notas o Reporte</h4>
+                        <form method="post" action="@Url.Action("GenerarReporte", "Respuesta")" onsubmit="return verificarEstado()">
+                            <textarea name="EstadoR" id="EstadoR" class="form-control" rows="5">@Model.EstadoR</textarea>
+                            <button type="submit" class="btn btn-success w-100 mt-2">Generar Reporte</button>
+                        </form>
+                    </div>
+
+                    <div class="btn-container">
+                        <div class="btn-container">
+                            <form method="post" action="@Url.Action("GenerarReporte", "Respuesta")" id="finalizarForm">
+                                <input type="hidden" name="EstadoR" value="Finalizado" />
+                                <button type="button" onclick="finalizarReporte()" class="btn btn-warning">Finalizar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @section Scripts {
+        <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+        <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+        <script>
+            const coords = @Html.Raw(Json.Serialize(Model.Ubicacion));
+
+            var map2 = L.map('map2').setView([coords[0], coords[1]], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map2);
+
+            L.marker([coords[0], coords[1]]).addTo(map2)
+                .bindPopup("Ubicación Inicial del Incidente")
+                .openPopup();
+
+            function calculateRoute() {
+                const destination = document.getElementById('destination').value;
+                if (!destination) {
+                    alert("Por favor, ingresa un destino.");
+                    return;
+                }
+
+                fetch(`https://nominatim.openstreetmap.org/search?q=${destination}&format=json`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length === 0) {
+                            alert("No se encontró la ubicación. Intenta con otro destino.");
+                            return;
+                        }
+
+                        const destCoords = [data[0].lat, data[0].lon];
+                        L.Routing.control({
+                            waypoints: [
+                                L.latLng(coords[0], coords[1]),
+                                L.latLng(destCoords[0], destCoords[1])
+                            ],
+                            routeWhileDragging: true
+                        }).addTo(map2);
+
+                        L.marker(destCoords).addTo(map2).bindPopup("Destino").openPopup();
+                    })
+                    .catch(error => console.error("Error al obtener coordenadas del destino:", error));
+            }
+
+            function finalizarReporte() {
+                const confirmar = confirm("¿Desea finalizar este reporte? Esto marcará el caso como finalizado.");
+                if (confirmar) {
+                    // Enviar el formulario de finalización
+                    document.getElementById('finalizarForm').submit();
+                }
+            }
+
+            function verificarEstado() {
+                const estadoR = document.getElementById('EstadoR').value.trim();
+
+                if (estadoR.toLowerCase().includes('finalizado')) {
+                    const confirmar = confirm(
+                        "El reporte contiene la palabra 'Finalizado'. Esto cerrará el caso. ¿Desea continuar?"
+                    );
+                    return confirmar; 
+                }
+
+                return true; 
+            }
+
+
+        </script>
+        }
+    }
+</body>
+</html>

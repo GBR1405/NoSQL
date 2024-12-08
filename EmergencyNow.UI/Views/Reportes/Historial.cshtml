@@ -1,0 +1,168 @@
+﻿@model List<EmergencyNow.UI.Models.Interfaces.Reportes.ReporteDto>
+
+@{
+    ViewData["Title"] = "Historial de Reportes";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Historial de Reportes</h2>
+    <p class="text-center text-muted">
+        Consulta y filtra tus reportes de emergencia de manera rápida y eficiente.
+    </p>
+
+    <!-- Cuadro de reportes en proceso -->
+    <div id="reportesEnProceso" class="alert alert-info text-center" role="alert">
+        <!-- Este texto se actualizará dinámicamente con JavaScript -->
+        <strong>Tienes [0] reportes</strong> que fueron respondidos y están ahora mismo en proceso, sea paciente y espere actualizaciones.
+    </div>
+
+    <!-- Barra de búsqueda -->
+    <div class="input-group mb-4">
+        <input type="text" id="searchBox" class="form-control" placeholder="Buscar por tipo de incidente..." />
+        <select id="filterEstado" class="form-control ml-2">
+            <option value="">Filtrar por estado</option>
+            <option value="En proceso">En proceso</option>
+            <option value="Activo">Activo</option>
+            <option value="Finalizado">Finalizado</option>
+        </select>
+        <div class="input-group-append">
+            <button class="btn btn-primary" id="searchButton">Buscar</button>
+        </div>
+    </div>
+
+    <!-- Tabla de reportes -->
+    <table class="table table-striped table-bordered table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>Fecha</th>
+                <th>Tipo de Incidente</th>
+                <th>Descripción</th>
+                <th>Gravedad</th>
+                <th>Estado actual del caso</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="reportTable">
+            @foreach (var reporte in Model)
+            {
+                <tr class="table-row">
+                    <td>@reporte.FechaReporte.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@reporte.TipoIncidente</td>
+                    <td>@reporte.Descripcion</td>
+                    <td>@reporte.Gravedad</td>
+                    <td>@reporte.Estado</td>
+
+                    @if(reporte.Estado == "Activo"){
+                        <td>
+                            <a asp-action="Detalle" asp-route-id="@reporte.Id" class="btn btn-info btn-sm">Ver Detalle</a>
+                        </td>
+                    }else{
+                        <td>
+                            <a asp-action="DetalleCompleto" asp-route-id="@reporte.Id" class="btn btn-info btn-sm">Ver Detalle</a>
+                        </td>
+                    }
+
+                    
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        // Actualizar el cuadro de "reportes en proceso"
+        function actualizarCuadroReportesEnProceso() {
+            const rows = document.querySelectorAll('#reportTable tr');
+            let count = 0;
+
+            rows.forEach(row => {
+                const estado = row.cells[4].textContent.trim(); // Estado en la columna 4
+                if (estado === "En proceso") {
+                    count++;
+                }
+            });
+
+            const cuadro = document.getElementById('reportesEnProceso');
+            cuadro.innerHTML = `<strong>Tienes [${count}] reportes</strong> que fueron respondidos y están ahora mismo en proceso, sea paciente y espere actualizaciones.`;
+        }
+
+        // Filtrar la tabla según el texto ingresado en la barra de búsqueda y el estado seleccionado
+        document.getElementById('searchButton').addEventListener('click', function () {
+            const query = document.getElementById('searchBox').value.toLowerCase();
+            const estadoFiltro = document.getElementById('filterEstado').value;
+            const rows = document.querySelectorAll('#reportTable tr');
+
+            rows.forEach(row => {
+                const tipoIncidente = row.cells[1].textContent.toLowerCase();
+                const estado = row.cells[4].textContent.trim();
+
+                const coincideBusqueda = tipoIncidente.includes(query) || query === "";
+                const coincideEstado = estadoFiltro === "" || estado === estadoFiltro;
+
+                if (coincideBusqueda && coincideEstado) {
+                    row.style.display = ''; // Mostrar fila
+                } else {
+                    row.style.display = 'none'; // Ocultar fila
+                }
+            });
+
+            actualizarCuadroReportesEnProceso(); // Actualizar el cuadro después del filtrado
+        });
+
+        // Actualizar el cuadro de "reportes en proceso" al cargar la página
+        window.addEventListener('load', () => {
+            actualizarCuadroReportesEnProceso();
+
+            // Añadir efecto de opacidad gradual al cargar la tabla
+            const tableRows = document.querySelectorAll('.table-row');
+            tableRows.forEach((row, index) => {
+                row.style.transition = 'opacity 0.5s ease';
+                row.style.opacity = 0;
+
+                // Efecto en cascada
+                setTimeout(() => {
+                    row.style.opacity = 1;
+                }, index * 100);
+            });
+        });
+    </script>
+
+    <!-- Estilos adicionales -->
+    <style>
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .thead-dark th {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+
+        #searchBox, #filterEstado {
+            border-radius: 5px;
+        }
+
+        #searchButton {
+            border-radius: 5px;
+        }
+
+        .input-group {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .alert {
+            max-width: 700px;
+            margin: 0 auto 20px;
+        }
+    </style>
+}

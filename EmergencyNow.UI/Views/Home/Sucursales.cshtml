@@ -1,0 +1,152 @@
+﻿@model IEnumerable<EmergencyNow.UI.Models.Interfaces.Reportes.Organizaciones>
+
+@{
+    ViewData["Title"] = "Sucursales";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Usando el Layout
+}
+
+<!-- Contenedor para la imagen y el título dentro de la imagen -->
+<div class="text-center position-relative">
+    <img src="https://wallpapercave.com/wp/wp2471860.jpg" class="img-fluid" alt="Imagen de título" style="width: 100%; height: 50vh; object-fit: cover;">
+    <h1 class="position-absolute top-50 start-50 translate-middle text-white">Nuestras Organizaciones</h1>
+</div>
+
+
+<!-- Explicación debajo de la imagen -->
+<div class="container mt-4">
+    <h2 class="text-md-center">Informacion de las organizaciones</h2>
+    <p>
+        Nos hemos unido con muchas organizaciones públicas y privadas para ofrecer un nivel de seguridad sin precedentes en nuestra comunidad. Estas alianzas estratégicas nos permiten contar con recursos y capacidades que abarcan una amplia variedad de servicios, desde atención médica de emergencia hasta respuesta ante incendios y situaciones policiales.
+        Al trabajar con organizaciones locales e internacionales, garantizamos que nuestros equipos estén mejor equipados y preparados para cualquier eventualidad. Nos comprometemos a ser un referente de seguridad y bienestar, y nuestras alianzas son fundamentales para lograrlo.
+    </p>
+</div>
+
+<!-- Título para la lista de organizaciones -->
+<div class="text-center mt-5">
+    <h3>Lista de Organizaciones</h3>
+</div>
+
+<!-- Cards para mostrar las organizaciones -->
+<div class="container mt-4" id="organizaciones-list">
+    <div class="row">
+        @foreach (var organizacion in Model)
+        {
+            <div class="col-md-3 col-sm-6 col-12 mb-4">
+                <div class="testimonial-card card">
+                    <div class="card-up aqua-gradient"></div>
+                    <div class="avatar mx-auto">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/bb/Emblema_Cruz_Roja.jpg" class="rounded-circle img-fluid" alt="Logo de la organización">
+                    </div>
+                    <div class="card-body text-center">
+                        <h4 class="card-title font-weight-bold">@organizacion.Nombre</h4>
+                        <hr>
+                        <p><i class="fas fa-quote-left"></i> @organizacion.Tipo</p>
+                        <p><strong>Ubicación:</strong> @organizacion.Ubicacion</p>
+                        <p><strong>Teléfono:</strong> @organizacion.Contacto.Telefono</p>
+                        <p><strong>Email:</strong> @organizacion.Contacto.Email</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Función para ejecutar la búsqueda solo cuando se haga clic en el botón
+        $(document).ready(function () {
+            $('#buscar-btn').click(function () {
+                buscarOrganizaciones();
+            });
+
+            // También permitir la búsqueda presionando Enter
+            $('#busqueda').keypress(function (e) {
+                if (e.which === 13) { // Enter key code
+                    buscarOrganizaciones();
+                }
+            });
+        });
+
+        // Función AJAX para buscar organizaciones
+        function buscarOrganizaciones() {
+            var query = $('#busqueda').val(); // Obtiene el valor del input de búsqueda
+            if (query.trim() === "") {
+                alert("Por favor ingrese un nombre de organización para buscar.");
+                return;
+            }
+            $.ajax({
+                url: '@Url.Action("BuscarOrganizacionAjax", "Organizacion")',
+                data: { buscar: query },
+                type: 'GET',
+                success: function (data) {
+                    // Actualiza el contenido de las tarjetas con los resultados
+                    $('#organizaciones-list').html(data);
+                },
+                error: function () {
+                    alert('Error al buscar las organizaciones');
+                }
+            });
+        }
+    </script>
+}
+
+<style>
+    body {
+        background-color: #f5f7fa;
+    }
+
+    .testimonial-card .card-up {
+        height: 120px;
+        overflow: hidden;
+        border-top-left-radius: .25rem;
+        border-top-right-radius: .25rem;
+    }
+
+    .aqua-gradient {
+        background: linear-gradient(40deg, #e3340e, #f9fd0c) !important;
+    }
+
+    .testimonial-card .avatar {
+        width: 120px;
+        margin-top: -60px;
+        overflow: hidden;
+        border: 5px solid #fff;
+        border-radius: 50%;
+    }
+
+    .card {
+        width: 100%;
+        border: none;
+        border-radius: .25rem;
+        overflow: hidden;
+    }
+
+    .card-body {
+        background-color: #fff;
+        border-radius: .25rem;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+    }
+
+    .card-subtitle {
+        font-size: 1rem;
+        color: #888;
+    }
+
+    /* Estilo para que el título esté dentro de la imagen */
+    .position-relative {
+        position: relative;
+    }
+
+    .position-absolute {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 3rem;
+        font-weight: bold;
+    }
+</style>

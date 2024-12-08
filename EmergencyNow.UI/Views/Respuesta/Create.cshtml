@@ -1,0 +1,120 @@
+﻿@model EmergencyNow.UI.Models.Interfaces.ObjetoCompuesto.TipoRespuestaRepuesta
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Create</h1>
+
+<h4>Asignar Respuesta al Reporte</h4>
+<hr />
+<div class="row">
+    <!-- Cuadro Izquierdo: Información y Mapa del Reporte -->
+    <div class="col-md-6">
+        <h5>Reporte</h5>
+        <div>
+            <!-- Aquí va la información del reporte -->
+            <p><strong>Tipo de Incidente:</strong> @Model.Reporte.TipoIncidente</p>
+            <p><strong>Descripción:</strong> @Model.Reporte.Descripcion</p>
+            <p><strong>Gravedad:</strong> @Model.Reporte.Gravedad</p>
+            <p><strong>Fecha del Reporte:</strong> @Model.Reporte.FechaReporte.ToShortDateString()</p>
+
+            <!-- Mapa -->
+            <div id="map" style="height: 300px; width: 100%; border: 1px solid #ced4da;"></div>
+        </div>
+    </div>
+
+    <!-- Cuadro Derecho: Selección de Tipo de Respuesta -->
+    <div class="col-md-6">
+        <h5>Seleccionar Tipo de Respuesta</h5>
+        <div>
+            <button id="enviarEquipo" class="btn btn-primary" disabled onclick="enviarFormulario()">Generar Respuesta</button>
+            <hr />
+            <h6>Tipos de Respuesta Activos</h6>
+
+            <div class="row">
+                @foreach (var tipoRespuesta in Model.Respuestas)
+                {
+                    <div class="col-md-4 mb-3">
+                        <button type="button" class="btn btn-outline-primary tipoRespuestaBtn btn-block"
+                                id="tipoRespuestaBtn-@tipoRespuesta.Id"
+                                onclick="seleccionarRespuesta('@tipoRespuesta.Id', '@tipoRespuesta.Placa', '@tipoRespuesta.TipoDeRespuestaGeneral', '@tipoRespuesta.CantidadMaxDePersonas')">
+                            <h5>@tipoRespuesta.Placa</h5>
+                            <p>Tipo: @tipoRespuesta.TipoDeRespuestaGeneral</p>
+                            <p>Capacidad: @tipoRespuesta.CantidadMaxDePersonas</p>
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div>
+    <a asp-controller="Organizaciones" asp-action="ReportesEntrantes" class="btn btn-success btn-lg rounded shadow-lg">Volver</a>
+</div>
+
+<!-- Formulario oculto para enviar los dos IDs -->
+<form id="formRespuesta" action="@Url.Action("Create", "Respuesta")" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" id="idReporte" value="@Model.Reporte.Id" />
+    <input type="hidden" name="id2" id="idTipoRespuesta" />
+</form>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+    <script>
+        // Coordenadas del incidente desde el modelo
+        const coords = @Html.Raw(Json.Serialize(Model.Reporte.Ubicacion));
+
+        // Inicialización del mapa
+        var map = L.map('map').setView([coords[0], coords[1]], 15);
+
+        // Añadir capa de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
+
+        // Añadir marcador en la ubicación del incidente
+        L.marker([coords[0], coords[1]]).addTo(map)
+            .bindPopup('Ubicación del incidente')
+            .openPopup();
+
+        // Variable para almacenar la selección
+        var selectedTipoRespuestaId = null;
+
+        // Función para manejar la selección de un tipo de respuesta
+        function seleccionarRespuesta(id, placa, tipo, capacidad) {
+            // Desmarcar todas las opciones
+            const buttons = document.querySelectorAll('.tipoRespuestaBtn');
+            buttons.forEach(button => {
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-outline-primary');
+            });
+
+            // Marcar el botón seleccionado
+            const selectedButton = document.getElementById('tipoRespuestaBtn-' + id);
+            selectedButton.classList.remove('btn-outline-primary');
+            selectedButton.classList.add('btn-primary');
+
+            // Establecer el ID del tipo de respuesta seleccionado
+            selectedTipoRespuestaId = id;
+
+            // Habilitar el botón de Generar Respuesta
+            document.getElementById('enviarEquipo').disabled = false;
+
+            // (Opcional) Mostrar detalles de la respuesta seleccionada
+            console.log(`Placa: ${placa}, Tipo: ${tipo}, Capacidad: ${capacidad}`);
+        }
+
+        // Función para enviar el formulario con los dos IDs
+        function enviarFormulario() {
+            // Asignar el ID del tipo de respuesta seleccionado al formulario
+            document.getElementById('idTipoRespuesta').value = selectedTipoRespuestaId;
+
+            // Enviar el formulario
+            document.getElementById('formRespuesta').submit();
+        }
+    </script>
+}

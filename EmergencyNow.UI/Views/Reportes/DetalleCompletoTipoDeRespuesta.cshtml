@@ -1,0 +1,158 @@
+﻿@model EmergencyNow.UI.Models.Interfaces.Modelos.ModeloCompleto
+
+@{
+    ViewData["Title"] = "Detalle Completo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <!-- Título principal -->
+    <div class="text-center mb-4">
+        <h2 class="display-4 text-primary">Detalle de la Respuesta</h2>
+        <p class="lead">Informacion de los ultimos sucesos</p>
+    </div>
+
+    <div class="row">
+        <!-- Cuadro de la izquierda: Información del Reporte -->
+        <div class="col-md-6">
+            <div class="card shadow-sm rounded">
+                <div class="card-header bg-primary text-white rounded-top">
+                    <h4>Reporte de Incidente</h4>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">
+                            Tipo de Incidente
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.TipoIncidente)
+                        </dd>
+                        <dt class="col-sm-4">
+                            @Html.DisplayNameFor(model => model.Descripcion)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.Descripcion)
+                        </dd>
+                        <dt class="col-sm-4">
+                            @Html.DisplayNameFor(model => model.Gravedad)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.Gravedad)
+                        </dd>
+                        <dt class="col-sm-4">
+                            @Html.DisplayNameFor(model => model.Placa)
+                        </dt>
+                        <dd class="col-sm-8 text-right">
+                            @Html.DisplayFor(model => model.Placa)
+                        </dd>
+                        <dt class="col-sm-4">
+                            Ubicación
+                        </dt>
+                        <dd class="col-sm-8 text-center">
+                            @Html.DisplayFor(model => model.Ubicacion)
+                        </dd>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div id="map" style="height: 300px; width: 100%;" class="rounded"></div>
+                            </div>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cuadro de la derecha: Información sobre la Respuesta -->
+        <div class="col-md-6">
+            <div class="card shadow-sm rounded">
+                <div class="card-header bg-info text-white rounded-top">
+                    <h4>Respuesta al Incidente</h4>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">
+                            Nombre de la Organización
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.Nombre)
+                        </dd>
+                        <dt class="col-sm-4">
+                            Tipo de Respuesta
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.TipoDeRespuestaGeneral)
+                        </dd>
+                        <dt class="col-sm-4">
+                            Capacidad Máxima de Personas
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.CantidadMaxDePersonas)
+                        </dd>
+                        <dt class="col-sm-4">
+                            Reporte del Equipo
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.EstadoR)
+                        </dd>
+                        <dt class="col-sm-4">
+                            Hora de Respuesta
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.HoraDeRespuesta)
+                        </dd>
+                    </dl>
+
+                    <!-- Imagen del vehículo dependiendo del tipo de respuesta -->
+                    <div class="text-center mt-4">
+                        <img src="@{
+                            string imageUrl;
+                            switch (Model.TipoDeRespuestaGeneral.ToLower())
+                            {
+                                case "policial":
+                                    imageUrl = "https://static.vecteezy.com/system/resources/previews/013/271/121/non_2x/police-car-3d-rendering-png.png";
+                                    break;
+                                case "medica":
+                                    imageUrl = "https://static.vecteezy.com/system/resources/previews/026/773/226/non_2x/ambulance-with-ai-generated-free-png.png";
+                                    break;
+                                case "bomberos":
+                                    imageUrl = "https://static.vecteezy.com/system/resources/previews/026/772/547/non_2x/firetruck-with-ai-generated-free-png.png";
+                                    break;
+                                default:
+                                    imageUrl = "https://via.placeholder.com/150"; // Imagen predeterminada
+                                    break;
+                            }
+                                        @imageUrl
+                        }" alt="Vehículo de Respuesta" class="img-fluid rounded" style="max-width: 50%; height: auto;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mapa de ubicación -->
+    <!-- Botón Volver -->
+    <div class="mt-3 text-center">
+        <a asp-controller="Organizaciones" asp-action="MostrarEquipoDisponible" class="btn btn-secondary">Volver a la lista</a>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+    <script>
+        // Coordenadas del incidente desde el modelo
+        const coords = @Html.Raw(Json.Serialize(Model.Ubicacion));
+
+        // Inicialización del mapa
+        var map = L.map('map').setView([coords[0], coords[1]], 15);
+
+        // Añadir capa de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
+
+        // Añadir marcador en la ubicación del incidente
+        L.marker([coords[0], coords[1]]).addTo(map)
+            .bindPopup('Ubicación del incidente')
+            .openPopup();
+    </script>
+}
