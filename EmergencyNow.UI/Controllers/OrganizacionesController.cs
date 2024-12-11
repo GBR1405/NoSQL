@@ -124,11 +124,13 @@ namespace EmergencyNow.UI.Controllers
 
                     if (isOrganizacionSaved)
                     {
-                        ViewBag.Message = "Usuario y organización creados con éxito";
+                        TempData["Mensaje"] = "La organizacion fue creada correctamente";
+                        return View();
                     }
                     else
                     {
                         ModelState.AddModelError("", "Hubo un error al guardar la organización");
+                        return View(usuarioOrganizacion);
                     }
                 }
                 else
@@ -140,7 +142,8 @@ namespace EmergencyNow.UI.Controllers
                 }
             }
 
-            return View(usuarioOrganizacion);
+            TempData["Mensaje"] = "La organizacion fue creada correctamente";
+            return View();
         }
 
         public ActionResult CrearRespuesta()

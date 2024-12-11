@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EmergencyNow.UI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+37ae57b6190086773caa0212595570200f1c698d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c40d87a7cbd962fbab51fb28c05c9db7021cac60")]
 [assembly: System.Reflection.AssemblyProductAttribute("EmergencyNow.UI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EmergencyNow.UI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

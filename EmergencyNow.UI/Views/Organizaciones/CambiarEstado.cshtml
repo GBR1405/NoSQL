@@ -1,21 +1,54 @@
 ﻿@model EmergencyNow.UI.Models.Interfaces.Modelos.TipoDeRespuesta
 
-<h1>Cambiar Estado</h1>
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="card p-4 shadow-lg text-center" style="max-width: 500px; width: 100%;">
+        <h1 class="mb-4">Cambiar Estado</h1>
+        <p class="lead">¿Estás seguro de que deseas desactivar este tipo de respuesta?</p>
 
-<p>¿Estás seguro de que deseas desactivar este tipo de respuesta?</p>
+        <div class="my-4">
+            <h3 class="mb-3">Detalles:</h3>
+            <ul class="list-group text-start">
+                <li class="list-group-item"><strong>ID:</strong> @Model.Id</li>
+                <li class="list-group-item"><strong>Nombre:</strong> @Model.Placa</li>
+                <li class="list-group-item"><strong>Descripción:</strong> @Model.CantidadMaxDePersonas</li>
+                <li class="list-group-item"><strong>Estado Actual:</strong> @Model.Estado</li>
+            </ul>
+        </div>
 
-<div>
-    <h3>Detalles:</h3>
-    <ul>
-        <li><strong>ID:</strong> @Model.Id</li>
-        <li><strong>Nombre:</strong> @Model.Placa</li>
-        <li><strong>Descripción:</strong> @Model.CantidadMaxDePersonas</li>
-        <li><strong>Estado Actual:</strong> @Model.Estado</li>
-    </ul>
+        <form asp-action="CambiarEstadoConfirmado" method="post" class="mt-4">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger btn-lg mx-2 btn-animate">Cambiar Estado</button>
+            <a asp-action="MostrarEquipoDisponible" class="btn btn-secondary btn-lg mx-2 btn-animate">Cancelar</a>
+        </form>
+    </div>
 </div>
 
-<form asp-action="CambiarEstadoConfirmado" method="post">
-    <input type="hidden" name="id" value="@Model.Id" />
-    <button type="submit" class="btn btn-danger">Cambiar Estado</button>
-    <a asp-action="MostrarEquipoDisponible" class="btn btn-secondary">Cancelar</a>
-</form>
+<style>
+    /* Animación para botones */
+    .btn-animate {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .btn-animate:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+    /* Tarjeta centralizada */
+    .card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background-color: #fff;
+    }
+
+    h1, .lead {
+        color: #333;
+    }
+
+    /* Lista de detalles */
+    .list-group-item {
+        background: #f9f9f9;
+        border: none;
+        font-size: 16px;
+    }
+</style>
